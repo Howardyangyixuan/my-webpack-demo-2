@@ -6,9 +6,9 @@ const module = {};
 //项目绝对路径
 const projectRoot = resolve(__dirname, 'project_1');
 //依赖分析结果的类型
-type DepRelation = { [key: string]: { deps: string[], code: string } }
+type DepRelation = { key: string, deps: string[], code:string}
 //实例化一个分析结果对象
-const depRelation: DepRelation = {};
+const depRelation: DepRelation[] = [];
 
 //入口文件名
 const filename = 'index.js';
@@ -37,7 +37,8 @@ function collect(filepath: string) {
   const {code: es5code} = babel.transformFromAstSync(ast,code,{
     presets:['@babel/preset-env']
   })
-  depRelation[key] = {deps: [], code: es5code};
+  const dep = {key,deps: [], code: es5code}
+  depRelation.push(dep);
   babel.traverse(ast, {
     enter: item => {
       if (item.node.type === 'ImportDeclaration') {
@@ -46,7 +47,7 @@ function collect(filepath: string) {
         //依赖文件相对于项目目录的相对路径
         const depProjectPath = getProjectPath(depAbsolutePath);
         //将依赖存入依赖分析结果
-        depRelation[key].deps.push(depProjectPath);
+          dep.deps.push(depProjectPath);
         //递归分析依赖
         collect(depAbsolutePath);
       }
