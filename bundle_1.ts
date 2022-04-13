@@ -2,7 +2,6 @@ import babel = require('@babel/core');
 import * as fs from 'fs';
 import {dirname, relative, resolve} from 'path';
 
-const module = {};
 //项目绝对路径
 const projectRoot = resolve(__dirname, 'project_1');
 //依赖分析结果的类型
@@ -27,11 +26,10 @@ function getProjectPath(path: string) {
 function collect(filepath: string) {
   //入口文件相对路径
   const key = getProjectPath(filepath);
-  if (Object.keys(module).includes(key)) {
+  if (depRelation.find(i=>i.key===key)) {
     console.warn('存在循环依赖! 依赖为:', key);
     return;
   }
-  module[key] = undefined;
   const code = fs.readFileSync(filepath).toString();
   const ast = babel.parse(code, {sourceType: 'module'});
   const {code: es5code} = babel.transformFromAstSync(ast,code,{
